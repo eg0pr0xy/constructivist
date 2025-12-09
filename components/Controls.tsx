@@ -35,10 +35,6 @@ export const Controls: React.FC<ControlsProps> = ({ config, onChange, onGenerate
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200 p-6 overflow-y-auto">
       <div className="mb-8">
-        {/* Logo */}
-        <div className="mb-4 h-16 flex items-center justify-center">
-          <img src="/logo.png" alt="Constructivist Logo" className="h-full w-auto" />
-        </div>
         <h1 className="text-2xl font-bold tracking-tighter mb-1">CONSTRUCTIVIST</h1>
         <p className="text-xs text-gray-500">Generative Geometric Assembler</p>
       </div>
