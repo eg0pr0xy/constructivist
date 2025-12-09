@@ -7,21 +7,21 @@ function App() {
   const [config, setConfig] = useState<ArtConfig>(DEFAULT_CONFIG);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // To handle window resizing debouncing
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
 
   // Calculate canvas dimensions based on container and aspect ratio
   const getCanvasDimensions = useCallback(() => {
     if (!containerSize.width) return { width: 800, height: 800 };
-    
+
     const { width: maxW, height: maxH } = containerSize;
     const padding = 40;
     const availW = maxW - padding * 2;
     const availH = maxH - padding * 2;
 
     let targetW, targetH;
-    
+
     const [rw, rh] = config.aspectRatio.split(':').map(Number);
     const ratio = rw / rh;
 
@@ -40,7 +40,7 @@ function App() {
   // Handle resize observer
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setContainerSize({
@@ -49,7 +49,7 @@ function App() {
         });
       }
     });
-    
+
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
   }, []);
@@ -58,9 +58,9 @@ function App() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const { width, height } = getCanvasDimensions();
-    
+
     // Handle High DPI displays
     const dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;
@@ -70,11 +70,15 @@ function App() {
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     ctx.scale(dpr, dpr);
-    
+
     // Draw
-    drawComposition(ctx, width, height, config);
+    try {
+      drawComposition(ctx, width, height, config);
+    } catch (error) {
+      console.error('Error drawing composition:', error);
+    }
 
   }, [config, containerSize, getCanvasDimensions]);
 
@@ -87,15 +91,15 @@ function App() {
     // Create an offscreen canvas for high-res export (3000px on shortest side approx)
     const exportCanvas = document.createElement('canvas');
     const [rw, rh] = config.aspectRatio.split(':').map(Number);
-    
+
     // Base size 3000px
     const baseSize = 3000;
     const width = rw >= rh ? baseSize : baseSize * (rw/rh);
     const height = rh > rw ? baseSize : baseSize * (rh/rw);
-    
+
     exportCanvas.width = width;
     exportCanvas.height = height;
-    
+
     const ctx = exportCanvas.getContext('2d');
     if(ctx) {
       drawComposition(ctx, width, height, config);
@@ -108,12 +112,12 @@ function App() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden text-gray-800">
-      
+
       {/* Sidebar Controls - Fixed width on Desktop, full on Mobile */}
       <div className="w-80 h-full flex-shrink-0 z-10 shadow-xl">
-        <Controls 
-          config={config} 
-          onChange={setConfig} 
+        <Controls
+          config={config}
+          onChange={setConfig}
           onGenerate={handleGenerate}
           onDownload={handleDownload}
         />
@@ -121,14 +125,14 @@ function App() {
 
       {/* Main Canvas Area */}
       <div ref={containerRef} className="flex-1 h-full bg-gray-100 flex items-center justify-center overflow-hidden relative">
-        
+
         {/* Decorative background grid pattern for the 'desk' area */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ 
-          backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', 
-          backgroundSize: '20px 20px' 
+        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{
+          backgroundImage: 'radial-gradient(#000 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
         }}></div>
 
-        <canvas 
+        <canvas
           ref={canvasRef}
           className="shadow-2xl bg-white transition-all duration-300 ease-in-out"
         />
