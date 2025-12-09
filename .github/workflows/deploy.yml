@@ -31,9 +31,8 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git checkout --orphan gh-pages
-        git rm -rf .
-        cp -r dist/* .
-        git add .
-        git commit -m "Deploy to GitHub Pages"
-        git push origin gh-pages --force
+        mkdir -p docs
+        cp -r dist/* docs/
+        git add docs/
+        git commit -m "Deploy to GitHub Pages" || echo "No changes to commit"
+        git push
